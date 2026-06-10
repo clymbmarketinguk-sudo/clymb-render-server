@@ -87,6 +87,18 @@ function concatClips(clipPaths, outputPath) {
 }
 
 async function fullRender(uploadId, cutPlan, platform, dna, jobId, onProgress) {
+  console.log('fullRender received uploadId:', uploadId);
+  console.log('fullRender received cutPlan:', cutPlan);
+  console.log('fullRender received platform:', platform);
+
+  cutPlan = cutPlan.filter((cut) => {
+    if (cut.clipName === undefined || cut.clipName === null) {
+      console.warn('Skipping cut with missing clipName:', cut);
+      return false;
+    }
+    return true;
+  });
+
   const uploadDir = path.join(__dirname, '..', 'uploads', uploadId);
   const workDir = path.join(uploadDir, `render-${jobId}`);
   const outputDir = path.join(__dirname, '..', 'outputs');
@@ -106,7 +118,7 @@ async function fullRender(uploadId, cutPlan, platform, dna, jobId, onProgress) {
 
   for (let i = 0; i < cutPlan.length; i += 1) {
     const cut = cutPlan[i];
-    const inputPath = path.join(uploadDir, cut.filename);
+    const inputPath = path.join(uploadDir, cut.clipName);
     const cutOutput = path.join(workDir, `cut-${i}.mp4`);
 
     await cutClip(inputPath, cutOutput, cut.inPoint, cut.outPoint);
